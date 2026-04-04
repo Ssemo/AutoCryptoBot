@@ -1,0 +1,37 @@
+import ccxt
+import time
+from dotenv import load_dotenv
+import os
+
+load_dotenv()  # قراءة ملف .env
+
+exchange = ccxt.binance({
+    'apiKey': os.getenv('BINANCE_API_KEY'),
+    'secret': os.getenv('BINANCE_SECRET'),
+    'enableRateLimit': True,
+    'options': {'defaultType': 'spot'},
+    # للـ testnet (الآمن):
+    'urls': {
+        'api': {
+            'public': 'https://testnet.binance.vision/api',
+            'private': 'https://testnet.binance.vision/api'
+        }
+    }
+})
+
+symbol = 'SOL/USDT'
+buy_threshold = 140.0   # اشتري تحت هالسعر
+sell_threshold = 150.0  # بيع فوق هالسعر
+amount = 0.1            # كمية صغيرة للتجربة
+
+print("TradePulseBot بدأ يشتغل... 🚀")
+
+while True:
+    try:
+        ticker = exchange.fetch_ticker(symbol)
+        price = float(ticker )
+        print(f"سعر {symbol} الحالي: ${price:.2f}")
+
+        # جيب الرصيد
+        balance = exchange.fetch_balance()
+        sol
