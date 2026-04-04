@@ -3,35 +3,51 @@ import time
 from dotenv import load_dotenv
 import os
 
-load_dotenv()  # قراءة ملف .env
+load_dotenv()  # يقرأ ملف .env
 
 exchange = ccxt.binance({
     'apiKey': os.getenv('BINANCE_API_KEY'),
     'secret': os.getenv('BINANCE_SECRET'),
     'enableRateLimit': True,
     'options': {'defaultType': 'spot'},
-    # للـ testnet (الآمن):
-    'urls': {
-        'api': {
-            'public': 'https://testnet.binance.vision/api',
-            'private': 'https://testnet.binance.vision/api'
-        }
-    }
+    # للتستنت (testnet) فعّل السطور دي:
+    #'urls': {
+    #    'api': {
+    #        'public': 'https://testnet.binance.vision/api',
+    #        'private': 'https://testnet.binance.vision/api'
+    #    }
+    #},
+    #'urls': {'api': 'https://testnet.binance.vision/api'}  # أسهل طريقة
 })
 
 symbol = 'SOL/USDT'
-buy_threshold = 140.0   # اشتري تحت هالسعر
-sell_threshold = 150.0  # بيع فوق هالسعر
-amount = 0.1            # كمية صغيرة للتجربة
+buy_threshold = 140.0
+sell_threshold = 150.0
+amount = 0.1  # كمية صغيرة للتجربة
 
 print("TradePulseBot بدأ يشتغل... 🚀")
 
 while True:
     try:
         ticker = exchange.fetch_ticker(symbol)
-        price = float(ticker )
+        price = float(ticker )  # ← هنا كان الخطأ الأساسي
         print(f"سعر {symbol} الحالي: ${price:.2f}")
 
-        # جيب الرصيد
         balance = exchange.fetch_balance()
-        sol
+        usdt_free = balance  sol_free = balance  print(f"رصيد USDT المتاح: {usdt_free:.2f}")
+        print(f"رصيد SOL المتاح: {sol_free:.2f}\n")
+
+        # منطق بسيط للشراء والبيع (مثال فقط)
+        if price <= buy_threshold and usdt_free > amount * price:
+            print("→ سعر تحت الشراء! بنشتري...")
+            # exchange.create_market_buy_order(symbol, amount)  ← شيل التعليق لما تجرب
+
+        elif price >= sell_threshold and sol_free >= amount:
+            print("→ سعر فوق البيع! بنبيع...")
+            # exchange.create_market_sell_order(symbol, amount)  ← شيل التعليق لما تجرب
+
+        time.sleep(10)  # كل 10 ثواني تشيك
+
+    except Exception as e:
+        print(f"خطأ: {e}")
+        time.sleep(30)  # لو في مشكلة نستنى أكتر
