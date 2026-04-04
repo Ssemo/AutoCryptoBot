@@ -1,20 +1,44 @@
-name: فحص سعر SOL تلقائي
+import ccxt
+import time
 
-on:
-  schedule:
-    - cron: '0 * * * *'
-  workflow_dispatch:
+# إعداد البورصة بدون API (للقراءة فقط، ما يحتاج مفاتيح)
+exchange = ccxt.binance({'enableRateLimit': True})
 
-jobs:
-  check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: إعداد بايثون
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: تثبيت requests
-        run: pip install requests
-      - name: تشغيل فحص السعر
-        run: python check_price.py
+# قائمة العملات اللي في الصورة بالضبط (بدون رئيسية زيادة)
+coins = [
+    'AR/USDT', 'ASR/USDT', 'ATA/USDT', 'ATM/USDT', 'ATOM/USDT',
+    'AUDIO/USDT', 'AVA/USDT', 'AVAX/USDT', 'AXS/USDT', 'BAND/USDT',
+    'BAT/USDT', '1INCH/USDT', 'AAVE/USDT', 'ACM/USDT', 'ADA/USDT'
+]
+
+print("أسعار العملات المحددة (من Binance Spot):")
+print("--------------------------------------------------")
+print(f"{'العملة':<12} | {'السعر الحالي':<15} | {'التغيير 24س':<12} | {'الحجم 24س'}")
+print("--------------------------------------------------")
+
+for coin in coins:
+    try:
+        ticker = exchange.fetch_ticker(coin)
+        price = ticker change = ticker['percentage'] if 'percentage' in ticker else 0.0
+        volume = ticker # حجم التداول بالـ USDT
+
+        print(f"{coin:<12} | ${price:,.4f}     | {change:+.2f}%      | ${volume:,.0f}")
+    except Exception as e:
+        print(f"{coin:<12} | خطأ في جلب البيانات ({str(e)})")
+    
+    time.sleep(0.6)  # راحة لتجنب حظر الـ API
+
+print("--------------------------------------------------")
+print(f"تم عرض {len(coins)} عملة.")# داخل الـ if للشراء (مثال):
+if price <= buy_threshold and usdt_free >= amount * price:
+    msg = f"فرصة قوية! السعر تحت {buy_threshold}$، بنفتح شراء {amount} {symbol} الحين. المكسب المتوقع 70% خلال 48 ساعة لو استمر الاتجاه الصاعد. الدخول آمن والرصيد كافي. جاهز؟ 🚀"
+    print(msg)
+    send_telegram(msg)  # لو عندك تليجرام
+    # exchange.create_market_buy_order(symbol, amount)  # شيل # للتفعيل
+
+# داخل الـ elif للبيع:
+elif price >= sell_threshold and sol_free >= amount:
+    msg = f"السعر وصل {sell_threshold}$، بنبيع {amount} {symbol} الحين. المكسب المتوقع 70% من الدخول الأولي، وخلال 24 ساعة ممكن نضاعف الربح لو ما نزل. قرار رابح وسريع. ننفذ؟ 💰"
+    print(msg)
+    send_telegram(msg)
+    # exchange.create_market_sell_order(symbol, amount)
